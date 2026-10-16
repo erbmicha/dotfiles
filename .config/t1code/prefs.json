@@ -1,0 +1,28 @@
+{
+  "mainView": "thread",
+  "draftProvider": "codex",
+  "draftModel": "gpt-5.4",
+  "draftRuntimeMode": "full-access",
+  "draftInteractionMode": "default",
+  "diffOpen": false,
+  "diffView": "unified",
+  "selectedProjectId": "857acfa4-b6e4-4217-9165-4244ab957e1e",
+  "selectedThreadId": "921f2695-dab8-4224-bce2-6fa9a35a9012",
+  "expandedProjectIds": [
+    "857acfa4-b6e4-4217-9165-4244ab957e1e"
+  ],
+  "appSettings": {
+    "theme": "system",
+    "claudeBinaryPath": "",
+    "codexBinaryPath": "",
+    "codexHomePath": "",
+    "defaultThreadEnvMode": "local",
+    "confirmThreadDelete": true,
+    "enableAssistantStreaming": false,
+    "timestampFormat": "locale",
+    "sidebarProjectSortOrder": "manual",
+    "sidebarThreadSortOrder": "updated_at",
+    "customCodexModels": [],
+    "customClaudeModels": []
+  }
+}

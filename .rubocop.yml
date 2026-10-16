@@ -1,0 +1,65 @@
+AllCops:
+  NewCops: enable
+  Exclude:
+    - "db/schema.rb"
+    - "bin/*"
+    - "*.haml"
+Layout/LineLength:
+  Enabled: true
+  Max: 120
+Lint/EmptyFile:
+  Enabled: false
+Lint/MissingSuper:
+  AllowedParentClasses: [ApplicationCommand]
+Metrics/AbcSize:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Metrics/BlockNesting:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/ModuleLength:
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Enabled: false
+Naming/AccessorMethodName:
+  Enabled: false
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+Style/Documentation:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/GlobalVars:
+  Enabled: false
+Style/GuardClause:
+  Enabled: false
+Style/HashSyntax:
+  EnforcedShorthandSyntax: either
+Style/IfUnlessModifier:
+  Enabled: false
+Style/ModuleFunction:
+  Enabled: false
+Style/NestedTernaryOperator:
+  Enabled: false
+Style/NumericLiterals:
+  Enabled: false
+Style/PercentLiteralDelimiters:
+  Enabled: false
+Style/RedundantArgument:
+  Enabled: false
+Style/StringLiterals:
+  Enabled: false
+Style/SymbolArray:
+  Enabled: false
+Style/TrailingCommaInArguments:
+  Enabled: false
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: no_comma
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: no_comma

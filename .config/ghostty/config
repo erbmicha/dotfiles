@@ -1,0 +1,65 @@
+#-------------------#
+#-- NIGHTLY BUILD --#
+#-------------------#
+
+auto-update-channel = tip
+# auto-update-channel = stable
+
+#-----------#
+#-- FONTS --#
+#-----------#
+
+# font-family = "FiraCode Nerd Font Mono"
+# font-family = "GeistMono Nerd Font Mono"
+# font-family = "SF Mono"
+font-family = "Liga SFMono Nerd Font"
+# font-family = "CaskaydiaCove NFM Regular"
+font-feature = liga
+font-size = 14
+
+#-------------#
+#-- GHOSTTY --#
+#-------------#
+
+quick-terminal-position = top
+quick-terminal-autohide = false
+shell-integration = zsh
+shell-integration-features = true
+scrollback-limit = 524288000
+copy-on-select = clipboard
+
+#-----------------#
+#-- KEYBINDINGS --#
+#-----------------#
+
+keybind = global:ctrl+alt+cmd+y=toggle_visibility
+
+#------------------#
+#-- MacOS CONFIG --#
+#------------------#
+
+macos-hidden = never
+macos-auto-secure-input = true
+macos-secure-input-indication = true
+# macos-icon = blueprint
+macos-icon = chalkboard
+macos-auto-secure-input = true
+macos-option-as-alt = true
+macos-non-native-fullscreen = visible-menu
+macos-secure-input-indication = true
+macos-titlebar-style = tabs
+
+#------------#
+#-- THEMES --#
+#------------#
+
+# theme = "Ayu Mirage"
+# theme = "Builtin Pastel Dark"
+# theme = "Dracula+"
+# theme = "Firewatch"
+theme = "GitHub Dark"
+# theme = "Mariana"
+# theme = "MaterialDarker"
+# theme = "Oceanic-Next"
+# theme = "OneHalfDark"
+# theme = "Tomorrow Night"

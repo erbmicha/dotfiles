@@ -1,0 +1,11 @@
+---
+:benchmark: false
+:verbose: true
+:update_sources: true
+install: --no-rdoc --no-ri --no-document
+update: --no-rdoc --no-ri --no-document
+gemcutter_key: 74c87817e2badda2e8528c4a9f4c4f0e
+:sources:
+- http://rubygems.org
+:backtrace: false
+:bulk_threshold: 1000

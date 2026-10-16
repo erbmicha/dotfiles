@@ -1,0 +1,55 @@
+# ignore configs that are already in the application's directory which is a git repo
+.config/github-copilot/rm/*
+.config/yarn
+.config/zed/.tmp*
+.config/zed/conversations
+.config/zed/embeddings
+.config/zed/prompts
+
+*.bak
+*.db
+*.db-shm
+*.db-wal
+*.lock
+*.log
+*.pyc
+*.sqlite
+*.sqlite3
+
+log
+
+# Machine-local credentials; keep these files on this machine only.
+/.zshenv
+/.gitconfig
+/.skylight
+/.config/apache2/
+/.config/code-server/
+/.config/cody-ai/
+/.config/doctl/
+/.config/gh/hosts.yml
+/.config/github-copilot/
+/.config/opencode/opencode.jsonc
+/.config/spacetime/
+/.config/swamp/
+/.config/zed/settings.json
+
+# Application state, generated files, and machine-specific connections.
+.DS_Store
+node_modules/
+__pycache__/
+/.config/Autodesk/
+/.config/avante.nvim/
+/.config/cagent/
+/.config/configstore/
+/.config/containers/
+/.config/filezilla/
+/.config/gtk-2.0/
+/.config/herdr/session*.json
+/.config/herdr/release-notes.json
+/.config/hunk/
+/.config/iterm2/
+/.config/pgcli/history
+
+# Independently managed repositories; avoid unusable embedded Git links.
+/.config/nvim/
+/.config/zed/themes/

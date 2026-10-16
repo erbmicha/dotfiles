@@ -1,0 +1,345 @@
+function :q {
+  exit
+}
+
+function convert2gif () {
+  if (($# == 0)); then
+    echo 'Usage: convert2gif <mp4_filename>'
+  else
+    ffmpeg -i $1 -vf "fps=10,scale=600:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 $1.gif
+  fi
+}
+
+function convert2pnpm() {
+  # 1. Clear existing dependencies
+  rm -rf node_modules
+
+  # 2. Fix the Here-Doc syntax error (remove spaces before EOF)
+  cat <<-EOF > pnpm-workspace.yaml
+	packages:
+	  - 'apps/**'
+	  - 'packages/**'
+	  - '!**/test/**'
+	EOF
+
+  # 3. Import existing lockfiles before deleting them
+  if [[ -f yarn.lock || -f package-lock.json ]]; then
+    pnpm import
+  fi
+
+  # 4. Fix the lockfile names and handle missing file errors
+  rm -f yarn.lock package-lock.json
+
+  # 5. Fix the sed filename target and add macOS compatibility
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' 's/\bnpm\b/pnpm/g' package.json
+  else
+    sed -i 's/\bnpm\b/pnpm/g' package.json
+  fi
+
+  # 6. Install final dependencies and generate pnpm-lock.yaml
+  pnpm install
+}
+
+function fr () {
+  if ([ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]); then
+    echo "Usage: fr <pattern> <replacement> <filename>"
+  else
+    find . -type f -name '$3' -exec sed -i '' s/$1/$2/ {} +
+  fi
+}
+
+function gitrm () {
+  git status | grep deleted | awk '{print $3}' | xargs git rm
+}
+
+function gitl () {
+  if [ $# -lt 1 ]; then
+    git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=auto:human -15
+  else
+    git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=auto:human -$1
+  fi
+}
+
+function gri () {
+  if (($# == 0)); then
+    echo 'Usage: gri <number_of_commits>'
+  else
+    git rebase -i HEAD~"$1"
+  fi
+}
+
+function ghcs() {
+	FUNCNAME="$funcstack[1]"
+	TARGET="shell"
+	local GH_DEBUG="$GH_DEBUG"
+
+	read -r -d '' __USAGE <<-EOF
+	Wrapper around \`gh copilot suggest\` to suggest a command based on a natural language description of the desired output effort.
+	Supports executing suggested commands if applicable.
+
+	USAGE
+	  $FUNCNAME [flags] <prompt>
+
+	FLAGS
+	  -d, --debug              Enable debugging
+	  -h, --help               Display help usage
+	  -t, --target target      Target for suggestion; must be shell, gh, git
+	                           default: "$TARGET"
+
+	EXAMPLES
+
+	- Guided experience
+	  $ $FUNCNAME
+
+	- Git use cases
+	  $ $FUNCNAME -t git "Undo the most recent local commits"
+	  $ $FUNCNAME -t git "Clean up local branches"
+	  $ $FUNCNAME -t git "Setup LFS for images"
+
+	- Working with the GitHub CLI in the terminal
+	  $ $FUNCNAME -t gh "Create pull request"
+	  $ $FUNCNAME -t gh "List pull requests waiting for my review"
+	  $ $FUNCNAME -t gh "Summarize work I have done in issues and pull requests for promotion"
+
+	- General use cases
+	  $ $FUNCNAME "Kill processes holding onto deleted files"
+	  $ $FUNCNAME "Test whether there are SSL/TLS issues with github.com"
+	  $ $FUNCNAME "Convert SVG to PNG and resize"
+	  $ $FUNCNAME "Convert MOV to animated PNG"
+	EOF
+
+	local OPT OPTARG OPTIND
+	while getopts "dht:-:" OPT; do
+		if [ "$OPT" = "-" ]; then     # long option: reformulate OPT and OPTARG
+			OPT="${OPTARG%%=*}"       # extract long option name
+			OPTARG="${OPTARG#"$OPT"}" # extract long option argument (may be empty)
+			OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
+		fi
+
+		case "$OPT" in
+			debug | d)
+				GH_DEBUG=api
+				;;
+
+			help | h)
+				echo "$__USAGE"
+				return 0
+				;;
+
+			target | t)
+				TARGET="$OPTARG"
+				;;
+		esac
+	done
+
+	# shift so that $@, $1, etc. refer to the non-option arguments
+	shift "$((OPTIND-1))"
+
+	TMPFILE="$(mktemp -t gh-copilotXXX)"
+	trap 'rm -f "$TMPFILE"' EXIT
+	if GH_DEBUG="$GH_DEBUG" gh copilot suggest -t "$TARGET" "$@" --shell-out "$TMPFILE"; then
+		if [ -s "$TMPFILE" ]; then
+			FIXED_CMD="$(cat $TMPFILE)"
+			print -s "$FIXED_CMD"
+			echo
+			eval "$FIXED_CMD"
+		fi
+	else
+		return 1
+	fi
+}
+
+function ghce() {
+	FUNCNAME="$funcstack[1]"
+	local GH_DEBUG="$GH_DEBUG"
+
+	read -r -d '' __USAGE <<-EOF
+	Wrapper around \`gh copilot explain\` to explain a given input command in natural language.
+
+	USAGE
+	  $FUNCNAME [flags] <command>
+
+	FLAGS
+	  -d, --debug   Enable debugging
+	  -h, --help    Display help usage
+
+	EXAMPLES
+
+	# View disk usage, sorted by size
+	$ $FUNCNAME 'du -sh | sort -h'
+
+	# View git repository history as text graphical representation
+	$ $FUNCNAME 'git log --oneline --graph --decorate --all'
+
+	# Remove binary objects larger than 50 megabytes from git history
+	$ $FUNCNAME 'bfg --strip-blobs-bigger-than 50M'
+	EOF
+
+	local OPT OPTARG OPTIND
+	while getopts "dh-:" OPT; do
+		if [ "$OPT" = "-" ]; then     # long option: reformulate OPT and OPTARG
+			OPT="${OPTARG%%=*}"       # extract long option name
+			OPTARG="${OPTARG#"$OPT"}" # extract long option argument (may be empty)
+			OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
+		fi
+
+		case "$OPT" in
+			debug | d)
+				GH_DEBUG=api
+				;;
+
+			help | h)
+				echo "$__USAGE"
+				return 0
+				;;
+		esac
+	done
+
+	# shift so that $@, $1, etc. refer to the non-option arguments
+	shift "$((OPTIND-1))"
+
+	GH_DEBUG="$GH_DEBUG" gh copilot explain "$@"
+}
+
+function gwa() {
+  # Check if current directory is a git repository
+  if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    echo "You must be in a git repository to use 'git worktree add'"
+    return 1
+  fi
+
+  # Check for new worktree directory argument
+  if [ -z "$1" ]; then
+    echo "Usage: gwa <new worktree directory>"
+    return 1
+  fi
+
+  local new_dir=$1
+  local worktree_path="../$new_dir" # Define the full path for the new worktree
+
+  # Check if a branch with the name $new_dir already exists
+  # 'git branch --list <branch_name>' will output the branch name if it exists.
+  # We check if the output contains the branch name.
+  if git branch --list "$new_dir" | grep -q "$new_dir"; then
+    echo "Branch '$new_dir' already exists. Creating worktree using existing branch."
+    # Add the new Git worktree, checking out the existing branch
+    git worktree add "$worktree_path" "$new_dir"
+  else
+    echo "Branch '$new_dir' does not exist. Creating a new branch and worktree."
+    # Add the new Git worktree, creating and checking out a new branch
+    git worktree add -b "$new_dir" "$worktree_path"
+  fi
+
+  # Check if the worktree was successfully added before copying files
+  if [ ! -d "$worktree_path" ]; then
+    echo "Failed to create worktree at '$worktree_path'."
+    return 1
+  fi
+
+  # Copy .env.* files from the current directory to the new worktree directory
+  # This copies all files matching the pattern, including .env, .env.local, etc.
+  # The 'cp' command will create the files in the new directory if they don't exist.
+  # If there are no .env.* files, this command will still run but won't copy anything.
+  if [ -f .env ] || ls .env.* 1> /dev/null 2>&1; then
+    echo "Copying .env files to the new worktree directory..."
+    cp .env.* "$worktree_path" 2>/dev/null || true # Suppress error if no .env files exist
+  fi
+
+  # Copy .key files from config or credentials to the new worktree directory
+  if [ -f config/master.key ]; then
+    echo "Copying master.key file to the new worktree directory..."
+    cp config/master.key "$worktree_path/config/" 2>/dev/null || true # Suppress error if no master.key files exist
+  fi
+
+  if [ -d config/credentials ] && ls config/credentials/*.key 1> /dev/null 2>&1; then
+    echo "Copying credentials .key files to the new worktree directory..."
+    cp config/credentials/*.key "$worktree_path/config/credentials/" 2>/dev/null || true # Suppress error if no credentials/*.key files exist
+  fi
+
+  # Change to the new worktree directory
+  cd "$worktree_path" || { echo "Failed to change directory to '$worktree_path'"; return 1; }
+
+  echo "Successfully created/updated worktree at '$worktree_path' and switched to it."
+}
+
+function gwr() {
+  if [ -z "$1" ]; then
+    echo "Usage: gwr <existing worktree directory>"
+    return 1
+  fi
+
+  local worktree_dir=$1
+
+  # Remove the new Git worktree
+  git worktree remove -f ../"$worktree_dir"
+
+  # Delete the worktree branch
+  git branch -D "$worktree_dir"
+}
+
+function ngrok_start () {
+  if [ $# -lt 1 ]; then
+    ngrok http --domain=regular-stunning-raptor.ngrok-free.app 3000
+  else
+    ngrok http --domain=regular-stunning-raptor.ngrok-free.app $1
+  fi
+}
+
+function pull_image_from_video () {
+  if (($# == 0)); then
+    echo "Usage: pull_image_from_video <filename>"
+  else
+    ffmpeg -loglevel error -i "$1" -vframes 1 -update 1 "${1:r}.jpg"
+  fi
+}
+
+function remove_ascii_colors () {
+  if (($# == 0)); then
+    echo "Usage: remove_ascii_colors <filename>"
+  else
+    cat $1 | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" > "cleaned_$1"
+  fi
+}
+
+function unlock_drives() {
+  echo "🔓 Unlocking encrypted APFS volumes...\n"
+
+  # Array of volumes to unlock (disk identifier, name)
+  local volumes=(
+    "disk7s1:Backup 1TB"
+    "disk9s1:Storage"
+    "disk10s1:Attic"
+  )
+
+  for volume_info in "${volumes[@]}"; do
+    local disk="${volume_info%%:*}"
+    local name="${volume_info##*:}"
+
+    # Check if volume is already unlocked
+    if diskutil apfs list | grep -A 10 "$disk" | grep -q "FileVault:.*Yes (Unlocked)"; then
+      echo "✓ $name ($disk) is already unlocked"
+    else
+      echo "\n📀 Unlocking $name ($disk)..."
+      diskutil apfs unlockVolume "$disk"
+
+      if [ $? -eq 0 ]; then
+        echo "✓ Successfully unlocked $name"
+      else
+        echo "✗ Failed to unlock $name"
+      fi
+    fi
+  done
+
+  echo "\n✅ Done!"
+}
+
+function ytdl () {
+  if [ $# -lt 1 ]; then
+    echo "Usage: ytdl <video_url>"
+  else
+    yt-dlp -t mp4 --cookies-from-browser brave $1
+  fi
+}
+
+# vim: ft=zsh
